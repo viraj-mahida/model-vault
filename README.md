@@ -154,3 +154,8 @@ All conversations are automatically logged to `mini-vault/src/logs/log.jsonl` in
 3. **Port already in use**: Make sure no other application is using port 8000
 
 4. **Docker issues**: The `--network host` flag should solve all networking problems between Docker and Ollama
+
+## Tradeoffs or Design Thoughts
+
+- **Fetch over Axios**: Used native `fetch()` to avoid external dependencies and reduce bundle size while maintaining full control over streaming with `ReadableStream` API.
+- **Streaming Responses**: Implemented real-time streaming to provide immediate user feedback as the AI generates text, improving perceived performance and user experience.
