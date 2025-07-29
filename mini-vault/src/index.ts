@@ -97,55 +97,6 @@ app.post('/generate', async (req, res) => {
   }
 });
 
-app.get('/status', (req, res) => {
-  try {
-    const memoryUsage = process.memoryUsage();
-    const uptime = process.uptime();
-    
-    // Convert bytes to MB for better readability
-    const formatMemory = (bytes) => Math.round(bytes / 1024 / 1024 * 100) / 100;
-    
-    // Convert uptime to readable format
-    const formatUptime = (seconds) => {
-      const days = Math.floor(seconds / 86400);
-      const hours = Math.floor((seconds % 86400) / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-      
-      return `${days}d ${hours}h ${minutes}m ${secs}s`;
-    };
-
-    const status = {
-      timestamp: new Date().toISOString(),
-      uptime: {
-        seconds: uptime,
-        formatted: formatUptime(uptime)
-      },
-      memory: {
-        rss: `${formatMemory(memoryUsage.rss)} MB`,
-        heapTotal: `${formatMemory(memoryUsage.heapTotal)} MB`,
-        heapUsed: `${formatMemory(memoryUsage.heapUsed)} MB`,
-        external: `${formatMemory(memoryUsage.external)} MB`
-      },
-      process: {
-        pid: process.pid,
-        platform: process.platform,
-        nodeVersion: process.version,
-        cpuUsage: process.cpuUsage()
-      },
-      server: {
-        status: "running",
-        port: 8000
-      }
-    };
-
-    res.json(status);
-  } catch (error) {
-    console.error('Error getting status:', error);
-    res.status(500).json({ error: "Failed to get system status" });
-  }
-});
-
 app.listen(8000, () => {
   console.log("Server started at port: 8000");
 });
