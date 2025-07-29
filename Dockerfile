@@ -28,10 +28,6 @@ WORKDIR /app/mini-vault
 # Default Ollama URL (works with --network host)
 ENV OLLAMA_URL=http://localhost:11434/api/chat
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/status || exit 1
-
 # Install curl for healthcheck
 RUN apk add --no-cache curl
 

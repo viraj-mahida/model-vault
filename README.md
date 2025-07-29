@@ -1,17 +1,17 @@
-# Mini Vault - AI Chat Interface
+# Mini Vault - Run LLMs Locally
 
-A simple AI chat system that provides both a web server and command-line interface for interacting with Ollama AI models.
+A simple AI chat system that provides command-line interface for interacting with Ollama AI models locally.
 
 ## What does this project do?
 
 This project consists of two main components:
 
-1. **Mini Vault Server** (`mini-vault/`): An Express.js server that acts as a proxy to Ollama AI models
+1. **Server** (`mini-vault/`): An Express.js server that acts as a proxy to Ollama AI models
    - Provides `/generate` endpoint for AI text generation with streaming responses
    - Provides `/status` endpoint for system monitoring
    - Logs all conversations to JSONL files for later analysis
 
-2. **Mini Vault CLI** (`cli/`): A command-line interface that connects to the server
+2. **CLI** (`cli/`): A command-line interface that connects to the server
    - Interactive chat interface for sending prompts to AI models
    - Real-time streaming responses
    - System status checking capabilities
@@ -81,8 +81,8 @@ The CLI provides an interactive interface:
 *Mini Vault CLI*
 Type "exit" to quit, "status" to check system status.
 
-> prompt: Hello, how are you?
-> response: Hello! I'm doing well, thank you for asking...
+> prompt: Hello, who are you?
+> response: I'm a local AI model, running offline!
 
 > prompt: status
 > response:
@@ -154,7 +154,3 @@ All conversations are automatically logged to `mini-vault/src/logs/log.jsonl` in
 3. **Port already in use**: Make sure no other application is using port 8000
 
 4. **Docker issues**: The `--network host` flag should solve all networking problems between Docker and Ollama
-
-## Health Check
-
-The Docker container includes a health check that monitors the `/status` endpoint to ensure the application is running properly. 
