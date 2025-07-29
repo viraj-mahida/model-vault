@@ -2,6 +2,10 @@
 
 A simple AI chat system that provides command-line interface for interacting with Ollama AI models locally.
 
+## Video Demo
+
+[![Mini Vault Demo](https://img.youtube.com/vi/JtyXPAG6gf4/maxresdefault.jpg)](https://www.youtube.com/watch?v=JtyXPAG6gf4)
+
 ## What does this project do?
 
 This project consists of two main components:
