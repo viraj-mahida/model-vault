@@ -1,0 +1,17 @@
+{
+  "name": "mini-vault-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Simple AI agent CLI",
+  "main": "mini-vault-cli.js",
+  "bin": {
+    "mini-vault": "./mini-vault-cli.js"
+  },
+  "scripts": {
+    "start": "node mini-vault-cli.js"
+  },
+  "keywords": ["cli", "ai", "agent"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}
