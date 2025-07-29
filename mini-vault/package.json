@@ -1,0 +1,29 @@
+{
+  "name": "mini-vault",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "cli": "node cli/vault.js",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viraj-mahida/mini-vault.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/viraj-mahida/mini-vault/issues"
+  },
+  "homepage": "https://github.com/viraj-mahida/mini-vault#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "tsx": "^4.7.0"
+  }
+}
