@@ -1,82 +1,82 @@
-# Mini Vault - Dockerized AI Chat System
+# Mini Vault - AI Chat Interface
 
-A complete AI chat system running Ollama with Mistral model, a streaming API server, and an interactive CLI - all in Docker containers.
+A simple AI chat system that provides both a web server and command-line interface for interacting with Ollama AI models.
 
-## 🚀 Quick Start
+## What does this project do?
 
-### Prerequisites
-- Docker and Docker Compose installed
-- At least 4GB RAM available for Ollama
+This project consists of two main components:
 
-### One-Command Setup
+1. **Mini Vault Server** (`mini-vault/`): An Express.js server that acts as a proxy to Ollama AI models
+   - Provides `/generate` endpoint for AI text generation with streaming responses
+   - Provides `/status` endpoint for system monitoring
+   - Logs all conversations to JSONL files for later analysis
+
+2. **Mini Vault CLI** (`cli/`): A command-line interface that connects to the server
+   - Interactive chat interface for sending prompts to AI models
+   - Real-time streaming responses
+   - System status checking capabilities
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (recommended)
+- [Ollama](https://ollama.ai/) running locally
+- Node.js 18+ (if running without Docker)
+
+## Quick Start with Docker (Simple & Recommended)
+
+### Step 1: Setup Ollama
 
 ```bash
-# Start everything
-./run.sh start
+# Install and start Ollama (if not already done)
+curl -fsSL https://ollama.ai/install.sh | sh
 
-# Use the CLI (in a new terminal)
-./run.sh cli
+# Pull the required model
+ollama pull smollm:135m
+
+# Start Ollama (runs on localhost:11434)
+ollama serve
 ```
 
-## 📋 Available Commands
+### Step 2: Build and Run with Docker
 
-| Command | Description |
-|---------|-------------|
-| `./run.sh start` | Start Ollama + Mini Vault server |
-| `./run.sh cli` | Launch interactive CLI |
-| `./run.sh status` | Check service status |
-| `./run.sh logs` | View service logs |
-| `./run.sh stop` | Stop all services |
-| `./run.sh clean` | Stop and remove all data |
-
-## 🏗️ System Architecture
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Mini Vault    │    │   Mini Vault     │    │     Ollama      │
-│      CLI        │◄──►│     Server       │◄──►│   + Mistral     │
-│  (Interactive)  │    │  (Port 8000)     │    │  (Port 11434)   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-## 🛠️ Services
-
-### 1. **Ollama Service**
-- Runs Ollama AI server with Mistral model
-- Automatically pulls Mistral on first start
-- Port: `11434`
-- Persistent data storage
-
-### 2. **Mini Vault Server**
-- Node.js/Express API server
-- Streaming AI responses
-- System status endpoint
-- Port: `8000`
-- Logs saved to `./mini-vault/src/logs/`
-
-### 3. **Mini Vault CLI**
-- Interactive command-line interface
-- Real-time streaming responses
-- System status commands
-
-## 📖 Usage Examples
-
-### Starting the System
 ```bash
-./run.sh start
-```
-This will:
-1. Start Ollama container
-2. Download Mistral model (~4GB)
-3. Start the API server
-4. Health checks ensure everything is running
+# Build the image
+docker build -t mini-vault .
 
-### Using the CLI
+# Run the server (with auto-restart if it crashes)
+docker run --network host --restart unless-stopped mini-vault
+```
+
+That's it! The server runs on `localhost:8000`.
+
+### Step 3: Use the CLI
+
+In a new terminal:
+
 ```bash
-./run.sh cli
+# Install CLI dependencies (one-time setup)
+cd cli && npm install
+
+# Start the interactive CLI
+npm start
 ```
 
-In the CLI:
+## Alternative: Local Setup (No Docker)
+
+If you prefer to run without Docker:
+
+```bash
+# Terminal 1: Run server locally
+cd mini-vault && npm install && npm start
+
+# Terminal 2: Run CLI
+cd cli && npm install && npm start
+```
+
+### Step 4: Use the CLI
+
+The CLI provides an interactive interface:
+
 ```
 *Mini Vault CLI*
 Type "exit" to quit, "status" to check system status.
@@ -87,134 +87,74 @@ Type "exit" to quit, "status" to check system status.
 > prompt: status
 > response:
 === SYSTEM STATUS ===
-📊 MEMORY USAGE:
-  RSS: 45.67 MB
-  Heap Total: 20.12 MB
-⏱️ UPTIME:
-  Duration: 0d 1h 23m 45s
-💻 PROCESS INFO:
-  Platform: linux
-  Node Version: v18.17.0
+Timestamp: 2024-01-01T12:00:00.000Z
+Server Status: running (Port: 8000)
+...
 
 > prompt: exit
 ```
 
-### Direct API Access
-```bash
-# Get system status
-curl http://localhost:8000/status
 
-# Send a prompt
-curl -X POST http://localhost:8000/generate \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Hello world"}'
-```
 
-## 🔍 Monitoring
+## Available Commands in CLI
 
-### Check Service Health
-```bash
-./run.sh status
-```
+- **Any text prompt**: Sends the prompt to the AI model and streams the response
+- **`status`**: Shows detailed system information about the server
+- **`exit`**: Quit the CLI application
 
-### View Real-time Logs
-```bash
-./run.sh logs
-```
+## Server Endpoints
 
-### Individual Service Logs
-```bash
-# Server logs
-docker-compose logs mini-vault-server
+- **POST `/generate`**: Send a prompt and receive streaming AI response
+  ```json
+  {
+    "prompt": "Your question here"
+  }
+  ```
 
-# Ollama logs
-docker-compose logs ollama
-```
+- **GET `/status`**: Get system status information including memory usage, uptime, and process details
 
-## 🐛 Troubleshooting
+## File Structure
 
-### Common Issues
-
-**1. Ollama model download fails**
-```bash
-# Clean restart
-./run.sh clean
-./run.sh start
-```
-
-**2. Server not responding**
-```bash
-# Check if all services are running
-./run.sh status
-
-# View logs for errors
-./run.sh logs
-```
-
-**3. Out of memory**
-```bash
-# Clean up Docker resources
-./run.sh clean
-docker system prune -f
-```
-
-### Port Conflicts
-If ports 8000 or 11434 are in use, modify `docker-compose.yml`:
-```yaml
-ports:
-  - "9000:8000"  # Change external port
-```
-
-## 🔧 Development
-
-### Manual Docker Commands
-```bash
-# Build and start all services
-docker-compose up -d
-
-# Run CLI interactively
-docker-compose run --rm mini-vault-cli
-
-# Stop everything
-docker-compose down
-```
-
-### File Structure
 ```
 mini-vault-assign/
-├── docker-compose.yml      # Multi-service orchestration
-├── Dockerfile             # Node.js app container
-├── run.sh                 # Helper script
-├── mini-vault/            # API server
-│   ├── src/index.ts       # Main server file
-│   └── package.json
-└── cli/                   # CLI tool
-    ├── vault.js           # CLI implementation
-    └── package.json
+├── Dockerfile              # Docker configuration for the server
+├── .dockerignore           # Files to exclude from Docker build
+├── README.md              # This file
+├── mini-vault/            # Main server application
+│   ├── package.json       # Server dependencies
+│   └── src/
+│       ├── index.ts       # Express server with AI proxy
+│       └── logs/          # Conversation logs (auto-created)
+└── cli/                   # Command-line interface
+    ├── package.json       # CLI dependencies
+    └── vault.js           # CLI application
 ```
 
-## 📊 Resource Requirements
+## Configuration
 
-- **RAM**: 4-6GB (Ollama needs ~3GB for Mistral)
-- **Disk**: ~5GB (Docker images + model)
-- **CPU**: 2+ cores recommended
+- **AI Model**: Currently configured to use `smollm:135m` model
+- **Server Port**: 8000 (configurable in `mini-vault/src/index.ts`)
+- **Ollama URL**: Configurable via `OLLAMA_URL` environment variable
+  - Default: `http://localhost:11434/api/chat` (for local development)
+  - Docker: `http://host.docker.internal:11434/api/chat` (automatically set)
+  - Custom: `docker run -e OLLAMA_URL=http://your-ollama-host:11434/api/chat -p 8000:8000 mini-vault`
 
-## 🚦 Health Checks
+## Logs
 
-All services include health checks:
-- **Ollama**: API endpoint availability
-- **Server**: `/status` endpoint response
-- **Automatic restart** on failure
+All conversations are automatically logged to `mini-vault/src/logs/log.jsonl` in JSON Lines format for analysis and review.
 
-## 🔄 Updates
+## Troubleshooting
 
-To update to the latest versions:
-```bash
-./run.sh stop
-docker-compose pull
-./run.sh start
-```
+1. **"Connection refused" or "fetch failed" errors**: 
+   - Make sure Ollama is running: `ollama serve`
+   - Check if the model exists: `ollama list`
+   
+2. **"Model not found" errors**: Run `ollama pull smollm:135m` to download the model
 
----
+3. **Port already in use**: Make sure no other application is using port 8000
 
-**Enjoy your AI-powered Mini Vault! 🎉**
+4. **Docker issues**: The `--network host` flag should solve all networking problems between Docker and Ollama
+
+## Health Check
+
+The Docker container includes a health check that monitors the `/status` endpoint to ensure the application is running properly. 

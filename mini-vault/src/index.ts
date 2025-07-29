@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 const app = express();
 app.use(express.json());
 
-const llmUrl = "http://localhost:11434/api/chat"
+const llmUrl = process.env.OLLAMA_URL || "http://localhost:11434/api/chat"
 
 app.post('/generate', async (req, res) => {
   if (!req.body || !req.body.prompt) {
@@ -16,7 +16,7 @@ app.post('/generate', async (req, res) => {
   const prompt = req.body.prompt;
 
   const payload = {
-    model: "mistral",
+    model: "smollm:135m",
     messages: [{role: "user", content: prompt}],
     stream: true
   }
@@ -84,7 +84,7 @@ app.post('/generate', async (req, res) => {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    const newEntry = { prompt, response: fullResponse, streamed: true };
+    const newEntry = { prompt, response: fullResponse };
     const filePath = path.join(dirPath, "log.jsonl");
     fs.appendFileSync(filePath, JSON.stringify(newEntry) + "\n");
 
@@ -94,6 +94,55 @@ app.post('/generate', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to stream response from Ollama", details: error.message });
     }
+  }
+});
+
+app.get('/status', (req, res) => {
+  try {
+    const memoryUsage = process.memoryUsage();
+    const uptime = process.uptime();
+    
+    // Convert bytes to MB for better readability
+    const formatMemory = (bytes) => Math.round(bytes / 1024 / 1024 * 100) / 100;
+    
+    // Convert uptime to readable format
+    const formatUptime = (seconds) => {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+      
+      return `${days}d ${hours}h ${minutes}m ${secs}s`;
+    };
+
+    const status = {
+      timestamp: new Date().toISOString(),
+      uptime: {
+        seconds: uptime,
+        formatted: formatUptime(uptime)
+      },
+      memory: {
+        rss: `${formatMemory(memoryUsage.rss)} MB`,
+        heapTotal: `${formatMemory(memoryUsage.heapTotal)} MB`,
+        heapUsed: `${formatMemory(memoryUsage.heapUsed)} MB`,
+        external: `${formatMemory(memoryUsage.external)} MB`
+      },
+      process: {
+        pid: process.pid,
+        platform: process.platform,
+        nodeVersion: process.version,
+        cpuUsage: process.cpuUsage()
+      },
+      server: {
+        status: "running",
+        port: 8000
+      }
+    };
+
+    res.json(status);
+  } catch (error) {
+    console.error('Error getting status:', error);
+    res.status(500).json({ error: "Failed to get system status" });
   }
 });
 
